@@ -123,7 +123,6 @@
         .slice:nth-child(3)::before {
             animation-delay: calc(var(--uib-b) * 2);
         }
-
         .slice:nth-child(3)::after {
             animation-delay: calc(var(--uib-a) + var(--uib-b) * 2);
         }
@@ -131,7 +130,6 @@
         .slice:nth-child(4)::before {
             animation-delay: calc(var(--uib-b) * 3);
         }
-
         .slice:nth-child(4)::after {
             animation-delay: calc(var(--uib-a) + var(--uib-b) * 3);
         }
@@ -139,7 +137,6 @@
         .slice:nth-child(5)::before {
             animation-delay: calc(var(--uib-b) * 4);
         }
-
         .slice:nth-child(5)::after {
             animation-delay: calc(var(--uib-a) + var(--uib-b) * 4);
         }
@@ -147,7 +144,6 @@
         .slice:nth-child(6)::before {
             animation-delay: calc(var(--uib-b) * 5);
         }
-
         .slice:nth-child(6)::after {
             animation-delay: calc(var(--uib-a) + var(--uib-b) * 5);
         }
@@ -157,14 +153,101 @@
                 transform: translateX(calc(var(--uib-size) * 0.25)) scale(0.73684);
                 opacity: 0.65;
             }
+            5% {
+                transform: translateX(calc(var(--uib-size) * 0.235)) scale(0.684208);
+                opacity: 0.58;
+            }
+            10% {
+                transform: translateX(calc(var(--uib-size) * 0.182)) scale(0.631576);
+                opacity: 0.51;
+            }
+            15% {
+                transform: translateX(calc(var(--uib-size) * 0.129)) scale(0.578944);
+                opacity: 0.44;
+            }
+            20% {
+                transform: translateX(calc(var(--uib-size) * 0.076)) scale(0.526312);
+                opacity: 0.37;
+            }
+            25% {
+                transform: translateX(0%) scale(0.47368);
+                opacity: 0.3;
+            }
+            30% {
+                transform: translateX(calc(var(--uib-size) * -0.076)) scale(0.526312);
+                opacity: 0.37;
+            }
+            35% {
+                transform: translateX(calc(var(--uib-size) * -0.129)) scale(0.578944);
+                opacity: 0.44;
+            }
+            40% {
+                transform: translateX(calc(var(--uib-size) * -0.182)) scale(0.631576);
+                opacity: 0.51;
+            }
+            45% {
+                transform: translateX(calc(var(--uib-size) * -0.235)) scale(0.684208);
+                opacity: 0.58;
+            }
             50% {
                 transform: translateX(calc(var(--uib-size) * -0.25)) scale(0.73684);
                 opacity: 0.65;
+            }
+            55% {
+                transform: translateX(calc(var(--uib-size) * -0.235)) scale(0.789472);
+                opacity: 0.72;
+            }
+            60% {
+                transform: translateX(calc(var(--uib-size) * -0.182)) scale(0.842104);
+                opacity: 0.79;
+            }
+            65% {
+                transform: translateX(calc(var(--uib-size) * -0.129)) scale(0.894736);
+                opacity: 0.86;
+            }
+            70% {
+                transform: translateX(calc(var(--uib-size) * -0.076)) scale(0.947368);
+                opacity: 0.93;
+            }
+            75% {
+                transform: translateX(0%) scale(1);
+                opacity: 1;
+            }
+            80% {
+                transform: translateX(calc(var(--uib-size) * 0.076)) scale(0.947368);
+                opacity: 0.93;
+            }
+            85% {
+                transform: translateX(calc(var(--uib-size) * 0.129)) scale(0.894736);
+                opacity: 0.86;
+            }
+            90% {
+                transform: translateX(calc(var(--uib-size) * 0.182)) scale(0.842104);
+                opacity: 0.79;
+            }
+            95% {
+                transform: translateX(calc(var(--uib-size) * 0.235)) scale(0.789472);
+                opacity: 0.72;
             }
             100% {
                 transform: translateX(calc(var(--uib-size) * 0.25)) scale(0.73684);
                 opacity: 0.65;
             }
+        }
+
+        #debugConsole {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            border-radius: 5px;
         }
 
         @media (max-width: 768px) {
@@ -186,32 +269,11 @@
                 --uib-size: 60px;
             }
 
-            #consoleBox {
-                width: 250px;
-                height: 120px;
+            #debugConsole {
+                width: 200px;
+                height: 150px;
+                font-size: 10px;
             }
-        }
-
-        #consoleBox {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            width: 300px;
-            height: 150px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 12px;
-            border-radius: 5px;
-            padding: 10px;
-            overflow-y: auto; /* Makes the console scrollable */
-            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        #consoleOutput {
-            white-space: pre-wrap;
-            margin: 0;
-            overflow-wrap: break-word;
         }
     </style>
 </head>
@@ -236,44 +298,74 @@
             </div>
         </div>
     </div>
-
-    <div id="consoleBox">
-        <p id="consoleOutput">Console Initialized...</p>
-    </div>
+    <div id="debugConsole"></div>
 
     <script>
         const listenButton = document.getElementById('listenButton');
         const buttonCaption = document.getElementById('buttonCaption');
         const listeningText = document.getElementById('listeningText');
         const loader = document.querySelector('.loader');
-        const consoleOutput = document.getElementById('consoleOutput');
+        const debugConsole = document.getElementById('debugConsole');
 
         let isListening = false;
         let timeoutId;
+        let recognition;
 
-        function logToConsole(message) {
-            consoleOutput.innerText += `\n${message}`;
-            consoleOutput.scrollTop = consoleOutput.scrollHeight; // Auto-scroll to the bottom
+        function log(message) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            debugConsole.appendChild(logEntry);
+            debugConsole.scrollTop = debugConsole.scrollHeight;
         }
 
         function startListening() {
-            logToConsole("Started listening...");
             isListening = true;
             buttonCaption.style.display = 'none';
             listeningText.style.display = 'block';
             loader.style.display = 'block';
+            
+            log('Starting speech recognition...');
+
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            recognition.onresult = function(event) {
+                const result = event.results[event.results.length - 1];
+                const transcript = result[0].transcript;
+                log(`Heard: ${transcript}`);
+            };
+
+            recognition.onerror = function(event) {
+                log(`Error: ${event.error}`);
+            };
+
+            recognition.onend = function() {
+                if (isListening) {
+                    recognition.start();
+                }
+            };
+
+            recognition.start();
+            
             timeoutId = setTimeout(() => {
                 stopListening();
             }, 30000);
         }
 
         function stopListening() {
-            logToConsole("Stopped listening.");
             isListening = false;
             buttonCaption.style.display = 'block';
             listeningText.style.display = 'none';
             loader.style.display = 'none';
+            
+            if (recognition) {
+                recognition.stop();
+            }
+            
             clearTimeout(timeoutId);
+            log('Stopped listening');
         }
 
         listenButton.addEventListener('click', () => {
@@ -283,7 +375,8 @@
                 startListening();
             }
         });
+
+        log('Lyrical Master initialized');
     </script>
-    <script src="script.js"></script>
 </body>
 </html>
