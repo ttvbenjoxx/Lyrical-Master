@@ -1,33 +1,49 @@
-/* Darker purple gradient background */
+/* General Reset */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #7b5e9b, #5a3c73);
     text-align: center;
     color: #fff;
-    height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    height: 100vh;
 }
 
-/* Header styling */
+/* Header */
 header {
-    padding: 20px;
-    font-size: 28px;
-    font-weight: bold;
+    background-color: #5a3c73;
+    padding: 10px 20px;
 }
 
-/* Center button container */
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+}
+
+/* Main Content */
 main {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
-/* Microphone button */
+main h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+main p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* Microphone Button */
 #micButton {
     background-color: #3f51b5;
     border: none;
@@ -46,50 +62,15 @@ main {
     background-color: #303f9f;
 }
 
-/* Microphone icon */
-#micButton img {
-    width: 40px;
-    height: 40px;
+#micButton .material-icons {
+    font-size: 40px;
+    color: white;
 }
 
-/* Listening status */
-#status {
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-/* Lyrics display */
-#lyricsDisplay {
-    margin: 20px;
-    padding: 10px;
-    font-size: 18px;
-    white-space: pre-wrap;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    header {
-        font-size: 24px;
-    }
-
-    #micButton {
-        width: 70px;
-        height: 70px;
-    }
-
-    #micButton img {
-        width: 35px;
-        height: 35px;
-    }
-
-    #status {
-        font-size: 14px;
-    }
-
-    #lyricsDisplay {
-        font-size: 16px;
-    }
+/* Footer */
+footer {
+    background-color: #5a3c73;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: white;
 }
