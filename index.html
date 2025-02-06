@@ -4,20 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyrical Master</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Lyrical Master</h1>
+        <div class="logo">Lyrical Master</div>
     </header>
     
     <main>
+        <h1>Welcome to Lyrical Master!</h1>
+        <p>Your real-time lyrics companion.</p>
         <button id="micButton">
-            <img src="mic-icon.png" alt="Microphone">
+            <span class="material-icons">mic</span>
         </button>
         <p id="status">Press to Listen</p>
-        <div id="lyricsDisplay"></div>
     </main>
+
+    <footer>
+        <p>&copy; 2025 Lyrical Master. All rights reserved.</p>
+    </footer>
 
     <script src="processing.js"></script>
     <script src="syncing.js"></script>
