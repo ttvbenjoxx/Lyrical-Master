@@ -68,175 +68,18 @@
 
         .loader {
             display: none;
-            --uib-size: 80px;
-            --uib-color: #3f51b5;
-            --uib-speed: 2.5s;
-            height: var(--uib-size);
-            width: var(--uib-size);
             margin-top: 1rem;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-        }
-
-        .slice {
-            position: relative;
-            height: calc(var(--uib-size) / 6);
-            width: 100%;
-        }
-
-        .slice::before,
-        .slice::after {
-            --uib-a: calc(var(--uib-speed) / -2);
-            --uib-b: calc(var(--uib-speed) / -6);
-            content: '';
-            position: absolute;
-            top: 0;
-            left: calc(50% - var(--uib-size) / 12);
-            height: 100%;
-            width: calc(100% / 6);
+            width: 80px;
+            height: 80px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3f51b5;
             border-radius: 50%;
-            background-color: var(--uib-color);
-            flex-shrink: 0;
-            animation: orbit var(--uib-speed) linear infinite;
-            transition: background-color 0.3s ease;
+            animation: spin 1s linear infinite;
         }
 
-        .slice:nth-child(1)::after {
-            animation-delay: var(--uib-a);
-        }
-
-        .slice:nth-child(2)::before {
-            animation-delay: var(--uib-b);
-        }
-
-        .slice:nth-child(2)::after {
-            animation-delay: calc(var(--uib-a) + var(--uib-b));
-        }
-
-        .slice:nth-child(3)::before {
-            animation-delay: calc(var(--uib-b) * 2);
-        }
-
-        .slice:nth-child(3)::after {
-            animation-delay: calc(var(--uib-a) + var(--uib-b) * 2);
-        }
-
-        .slice:nth-child(4)::before {
-            animation-delay: calc(var(--uib-b) * 3);
-        }
-
-        .slice:nth-child(4)::after {
-            animation-delay: calc(var(--uib-a) + var(--uib-b) * 3);
-        }
-
-        .slice:nth-child(5)::before {
-            animation-delay: calc(var(--uib-b) * 4);
-        }
-
-        .slice:nth-child(5)::after {
-            animation-delay: calc(var(--uib-a) + var(--uib-b) * 4);
-        }
-
-        .slice:nth-child(6)::before {
-            animation-delay: calc(var(--uib-b) * 5);
-        }
-
-        .slice:nth-child(6)::after {
-            animation-delay: calc(var(--uib-a) + var(--uib-b) * 5);
-        }
-
-        @keyframes orbit {
-            0% {
-                transform: translateX(calc(var(--uib-size) * 0.25)) scale(0.73684);
-                opacity: 0.65;
-            }
-            5% {
-                transform: translateX(calc(var(--uib-size) * 0.235)) scale(0.684208);
-                opacity: 0.58;
-            }
-            10% {
-                transform: translateX(calc(var(--uib-size) * 0.182)) scale(0.631576);
-                opacity: 0.51;
-            }
-            15% {
-                transform: translateX(calc(var(--uib-size) * 0.129)) scale(0.578944);
-                opacity: 0.44;
-            }
-            20% {
-                transform: translateX(calc(var(--uib-size) * 0.076)) scale(0.526312);
-                opacity: 0.37;
-            }
-            25% {
-                transform: translateX(0%) scale(0.47368);
-                opacity: 0.3;
-            }
-            30% {
-                transform: translateX(calc(var(--uib-size) * -0.076)) scale(0.526312);
-                opacity: 0.37;
-            }
-            35% {
-                transform: translateX(calc(var(--uib-size) * -0.129)) scale(0.578944);
-                opacity: 0.44;
-            }
-            40% {
-                transform: translateX(calc(var(--uib-size) * -0.182)) scale(0.631576);
-                opacity: 0.51;
-            }
-            45% {
-                transform: translateX(calc(var(--uib-size) * -0.235)) scale(0.684208);
-                opacity: 0.58;
-            }
-            50% {
-                transform: translateX(calc(var(--uib-size) * -0.25)) scale(0.73684);
-                opacity: 0.65;
-            }
-            55% {
-                transform: translateX(calc(var(--uib-size) * -0.235)) scale(0.789472);
-                opacity: 0.72;
-            }
-            60% {
-                transform: translateX(calc(var(--uib-size) * -0.182)) scale(0.842104);
-                opacity: 0.79;
-            }
-            65% {
-                transform: translateX(calc(var(--uib-size) * -0.129)) scale(0.894736);
-                opacity: 0.86;
-            }
-            70% {
-                transform: translateX(calc(var(--uib-size) * -0.076)) scale(0.947368);
-                opacity: 0.93;
-            }
-            75% {
-                transform: translateX(0%) scale(1);
-                opacity: 1;
-            }
-            80% {
-                transform: translateX(calc(var(--uib-size) * 0.076)) scale(0.947368);
-                opacity: 0.93;
-            }
-            85% {
-                transform: translateX(calc(var(--uib-size) * 0.129)) scale(0.894736);
-                opacity: 0.86;
-            }
-            90% {
-                transform: translateX(calc(var(--uib-size) * 0.182)) scale(0.842104);
-                opacity: 0.79;
-            }
-            95% {
-                transform: translateX(calc(var(--uib-size) * 0.235)) scale(0.789472);
-                opacity: 0.72;
-            }
-            100% {
-                transform: translateX(calc(var(--uib-size) * 0.25)) scale(0.73684);
-                opacity: 0.65;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         #debugConsole {
@@ -270,7 +113,9 @@
             }
 
             .loader {
-                --uib-size: 60px;
+                width: 60px;
+                height: 60px;
+                border-width: 6px;
             }
 
             #debugConsole {
@@ -290,17 +135,8 @@
             </svg>
         </button>
         <p id="buttonCaption">Press to Listen</p>
-        <p id="listeningText">Listening</p>
-        <div class="loader">
-            <div class="container">
-                <div class="slice"></div>
-                <div class="slice"></div>
-                <div class="slice"></div>
-                <div class="slice"></div>
-                <div class="slice"></div>
-                <div class="slice"></div>
-            </div>
-        </div>
+        <p id="listeningText">Listening...</p>
+        <div class="loader"></div>
     </div>
     <div id="debugConsole"></div>
 
@@ -313,7 +149,7 @@
 
         const AUDD_API_KEY = '95ed2b366d6b459f91aa98afb222499d';
         let isListening = false;
-        let timeoutId;
+        let audioContext, mediaRecorder, audioStream;
 
         function log(message) {
             const logEntry = document.createElement('div');
@@ -322,11 +158,11 @@
             debugConsole.scrollTop = debugConsole.scrollHeight;
         }
 
-        async function identifySong(audioBlob) {
-            log('Sending audio to AudD API for song recognition...');
+        async function sendAudioChunk(blob) {
+            log('Sending audio chunk for song recognition...');
             const formData = new FormData();
             formData.append('api_token', AUDD_API_KEY);
-            formData.append('file', audioBlob);
+            formData.append('file', blob);
 
             try {
                 const response = await fetch('https://api.audd.io/', {
@@ -354,33 +190,23 @@
             listeningText.style.display = 'block';
             loader.style.display = 'block';
 
-            log('Listening...');
+            log('Initializing audio recording...');
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const mediaRecorder = new MediaRecorder(stream);
-                let chunks = [];
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new AudioContext();
+                mediaRecorder = new MediaRecorder(audioStream);
 
-                mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(chunks, { type: 'audio/wav' });
-                    chunks = [];
-                    stopListening();
-                    await identifySong(audioBlob);
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data.size > 0 && isListening) {
+                        await sendAudioChunk(event.data);
+                    }
                 };
 
-                mediaRecorder.start();
-                log('Recording started...');
-
-                timeoutId = setTimeout(() => {
-                    mediaRecorder.stop();
-                }, 30000); // Automatically stop after 30 seconds
-
-                listenButton.onclick = () => {
-                    if (isListening) mediaRecorder.stop();
-                };
+                mediaRecorder.start(1000); // Send audio every second
+                log('Listening and sending audio in real-time...');
             } catch (error) {
-                log('Error accessing microphone. Please allow microphone access and try again.');
+                log('Error accessing microphone. Please allow microphone access.');
                 stopListening();
             }
         }
@@ -391,7 +217,13 @@
             listeningText.style.display = 'none';
             loader.style.display = 'none';
 
-            clearTimeout(timeoutId);
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            if (audioStream) {
+                audioStream.getTracks().forEach((track) => track.stop());
+            }
+
             log('Stopped listening.');
         }
 
