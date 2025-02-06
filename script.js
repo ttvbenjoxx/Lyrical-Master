@@ -13,46 +13,63 @@ function logToConsole(message) {
     consoleOutput.scrollTop = consoleOutput.scrollHeight; // Auto-scroll to the bottom
 }
 
-function startListening() {
+async function requestMicrophoneAccess() {
+    try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        logToConsole("Microphone access granted.");
+    } catch (error) {
+        logToConsole("Microphone access denied.");
+        throw error;
+    }
+}
+
+async function startListening() {
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
         logToConsole("Speech recognition is not supported in this browser.");
         return;
     }
 
-    isListening = true;
-    buttonCaption.style.display = 'none';
-    listeningText.style.display = 'block';
-    loader.style.display = 'block';
-    logToConsole("Listening...");
+    try {
+        await requestMicrophoneAccess();
 
-    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.interimResults = true;
+        isListening = true;
+        buttonCaption.style.display = 'none';
+        listeningText.style.display = 'block';
+        loader.style.display = 'block';
+        logToConsole("Listening...");
 
-    recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join('');
-        logToConsole(`You said: ${transcript}`);
-    };
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;
 
-    recognition.onerror = (event) => {
-        logToConsole(`Error: ${event.error}`);
-        stopListening();
-    };
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+            logToConsole(`You said: ${transcript}`);
+        };
 
-    recognition.onend = () => {
-        if (isListening) {
-            logToConsole("Speech recognition stopped unexpectedly.");
+        recognition.onerror = (event) => {
+            logToConsole(`Error: ${event.error}`);
             stopListening();
-        }
-    };
+        };
 
-    recognition.start();
+        recognition.onend = () => {
+            if (isListening) {
+                logToConsole("Speech recognition stopped unexpectedly.");
+                stopListening();
+            }
+        };
 
-    timeoutId = setTimeout(() => {
-        stopListening();
-    }, 30000);
+        recognition.start();
+
+        timeoutId = setTimeout(() => {
+            stopListening();
+        }, 30000);
+
+    } catch (error) {
+        logToConsole("Failed to start listening. Ensure microphone access is allowed.");
+    }
 }
 
 function stopListening() {
