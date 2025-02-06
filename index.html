@@ -298,10 +298,11 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Div to display recognized song information -->
   <div id="songInfo"></div>
-  
+
+  <!-- Debug console (optional) -->
   <div id="debugConsole"></div>
 
   <script>
@@ -316,10 +317,9 @@
     const debugConsole = document.getElementById('debugConsole');
     const songInfo = document.getElementById('songInfo');
 
-    let isListening = false;
-    let timeoutId;
-    let recognition;
-    let transcriptAccumulated = "";
+    let isRecording = false;
+    let mediaRecorder;
+    let audioChunks = [];
 
     function log(message) {
       const logEntry = document.createElement('div');
@@ -328,110 +328,88 @@
       debugConsole.scrollTop = debugConsole.scrollHeight;
     }
 
-    function startListening() {
-      isListening = true;
-      transcriptAccumulated = ""; // reset transcript
+    function startRecording() {
+      isRecording = true;
       buttonCaption.style.display = 'none';
       listeningText.style.display = 'block';
       loader.style.display = 'block';
-      
-      log('Starting speech recognition...');
+      songInfo.innerHTML = ''; // clear previous result
+      log("Requesting microphone access...");
 
-      // Initialize Speech Recognition (uses Web Speech API)
-      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = true;
-      recognition.continuous = true;
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          log("Microphone access granted. Starting recording...");
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
 
-      recognition.onresult = function(event) {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            transcript += event.results[i][0].transcript;
-          }
-        }
-        if (transcript.trim() !== "") {
-          transcriptAccumulated += transcript + " ";
-          log(`Heard (final): ${transcript}`);
-        }
-      };
+          mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+              audioChunks.push(event.data);
+            }
+          };
 
-      recognition.onerror = function(event) {
-        log(`Error: ${event.error}`);
-      };
+          mediaRecorder.onstop = () => {
+            log("Recording stopped. Processing audio...");
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            sendAudio(audioBlob);
+            // Stop all tracks to release the microphone
+            stream.getTracks().forEach(track => track.stop());
+          };
 
-      recognition.onend = function() {
-        // Restart if still listening (this may occur unexpectedly)
-        if (isListening) {
-          recognition.start();
-        }
-      };
-
-      recognition.start();
-
-      // Automatically stop listening after 30 seconds
-      timeoutId = setTimeout(() => {
-        stopListening();
-      }, 30000);
+          mediaRecorder.start();
+          // Record for 5 seconds then stop
+          setTimeout(() => {
+            if (mediaRecorder.state !== "inactive") {
+              mediaRecorder.stop();
+            }
+            isRecording = false;
+            buttonCaption.style.display = 'block';
+            listeningText.style.display = 'none';
+          }, 5000);
+        })
+        .catch(err => {
+          log("Error accessing microphone: " + err);
+          listeningText.style.display = 'none';
+          loader.style.display = 'none';
+        });
     }
 
-    function stopListening() {
-      isListening = false;
-      buttonCaption.style.display = 'block';
-      listeningText.style.display = 'none';
-      // Keep loader visible until the API call finishes
-      if (recognition) {
-        recognition.stop();
-      }
-      clearTimeout(timeoutId);
-      log('Stopped listening. Final transcript: ' + transcriptAccumulated);
-
-      if (transcriptAccumulated.trim() !== "") {
-        recognizeSongByLyrics(transcriptAccumulated.trim());
-      } else {
-        loader.style.display = 'none';
-        log('No transcript captured.');
-      }
-    }
-
-    function recognizeSongByLyrics(lyrics) {
-      log("Querying AudD API with lyrics: " + lyrics);
+    function sendAudio(audioBlob) {
+      log("Sending audio to AudD API...");
       const formData = new FormData();
       formData.append("api_token", API_KEY);
-      formData.append("q", lyrics);
+      formData.append("file", audioBlob, "recording.wav");
 
       fetch(API_URL, {
         method: "POST",
         body: formData
       })
-      .then(response => response.json())
-      .then(data => {
-        log("AudD API response: " + JSON.stringify(data));
-        if (data && data.result) {
-          const title = data.result.title || "Unknown Title";
-          const artist = data.result.artist || "Unknown Artist";
-          songInfo.innerHTML = `<h2>${title}</h2><h3>${artist}</h3>`;
-        } else {
-          songInfo.innerHTML = `<p>Song not recognized. Please try again.</p>`;
-        }
-        loader.style.display = "none";
-      })
-      .catch(error => {
-        log("Error from AudD API: " + error);
-        songInfo.innerHTML = `<p>Error recognizing song.</p>`;
-        loader.style.display = "none";
-      });
+        .then(response => response.json())
+        .then(data => {
+          log("AudD API response: " + JSON.stringify(data));
+          if (data && data.result) {
+            const title = data.result.title || "Unknown Title";
+            const artist = data.result.artist || "Unknown Artist";
+            songInfo.innerHTML = `<h2>${title}</h2><h3>${artist}</h3>`;
+          } else {
+            songInfo.innerHTML = `<p>Song not recognized. Please try again.</p>`;
+          }
+          loader.style.display = 'none';
+        })
+        .catch(error => {
+          log("Error from AudD API: " + error);
+          songInfo.innerHTML = `<p>Error recognizing song.</p>`;
+          loader.style.display = 'none';
+        });
     }
 
     listenButton.addEventListener('click', () => {
-      if (isListening) {
-        stopListening();
-      } else {
-        startListening();
+      if (!isRecording) {
+        startRecording();
       }
     });
 
-    log('Lyrical Master initialized');
+    log("Lyrical Master initialized");
   </script>
 </body>
 </html>
