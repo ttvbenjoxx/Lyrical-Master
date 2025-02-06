@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lyrical Master</title>
   <style>
+    /* Global Styles */
     body {
       font-family: Arial, sans-serif;
       background-color: #ffffff;
@@ -14,15 +15,23 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      overflow-x: hidden;
     }
-
+    
     h1 {
       font-weight: bold;
       color: black;
       text-align: center;
       margin-top: 2rem;
     }
-
+    
+    .note {
+      font-size: 0.9rem;
+      color: gray;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    
     .button-container {
       display: flex;
       flex-direction: column;
@@ -30,7 +39,7 @@
       justify-content: center;
       flex-grow: 1;
     }
-
+    
     #listenButton {
       width: 100px;
       height: 100px;
@@ -43,29 +52,29 @@
       justify-content: center;
       transition: background-color 0.3s;
     }
-
+    
     #listenButton:hover {
       background-color: #303f9f;
     }
-
+    
     #listenButton svg {
       width: 50px;
       height: 50px;
       fill: white;
     }
-
+    
     #buttonCaption {
       margin-top: 1rem;
       color: gray;
     }
-
+    
     #listeningText {
       display: none;
       color: #3f51b5;
       font-weight: bold;
       margin-top: 1rem;
     }
-
+    
     .loader {
       display: none;
       --uib-size: 80px;
@@ -75,7 +84,7 @@
       width: var(--uib-size);
       margin-top: 1rem;
     }
-
+    
     .container {
       display: flex;
       flex-direction: column;
@@ -84,13 +93,13 @@
       height: 100%;
       width: 100%;
     }
-
+    
     .slice {
       position: relative;
       height: calc(var(--uib-size) / 6);
       width: 100%;
     }
-
+    
     .slice::before,
     .slice::after {
       --uib-a: calc(var(--uib-speed) / -2);
@@ -107,47 +116,47 @@
       animation: orbit var(--uib-speed) linear infinite;
       transition: background-color 0.3s ease;
     }
-
+    
     .slice:nth-child(1)::after {
       animation-delay: var(--uib-a);
     }
-
+    
     .slice:nth-child(2)::before {
       animation-delay: var(--uib-b);
     }
-
+    
     .slice:nth-child(2)::after {
       animation-delay: calc(var(--uib-a) + var(--uib-b));
     }
-
+    
     .slice:nth-child(3)::before {
       animation-delay: calc(var(--uib-b) * 2);
     }
     .slice:nth-child(3)::after {
       animation-delay: calc(var(--uib-a) + var(--uib-b) * 2);
     }
-
+    
     .slice:nth-child(4)::before {
       animation-delay: calc(var(--uib-b) * 3);
     }
     .slice:nth-child(4)::after {
       animation-delay: calc(var(--uib-a) + var(--uib-b) * 3);
     }
-
+    
     .slice:nth-child(5)::before {
       animation-delay: calc(var(--uib-b) * 4);
     }
     .slice:nth-child(5)::after {
       animation-delay: calc(var(--uib-a) + var(--uib-b) * 4);
     }
-
+    
     .slice:nth-child(6)::before {
       animation-delay: calc(var(--uib-b) * 5);
     }
     .slice:nth-child(6)::after {
       animation-delay: calc(var(--uib-a) + var(--uib-b) * 5);
     }
-
+    
     @keyframes orbit {
       0% {
         transform: translateX(calc(var(--uib-size) * 0.25)) scale(0.73684);
@@ -234,7 +243,42 @@
         opacity: 0.65;
       }
     }
-
+    
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    /* Debug Console (optional) */
     #debugConsole {
       position: fixed;
       bottom: 10px;
@@ -249,26 +293,26 @@
       overflow-y: auto;
       border-radius: 5px;
     }
-
+    
     @media (max-width: 768px) {
       h1 {
         font-size: 1.5rem;
       }
-
+    
       #listenButton {
         width: 80px;
         height: 80px;
       }
-
+    
       #listenButton svg {
         width: 40px;
         height: 40px;
       }
-
+    
       .loader {
         --uib-size: 60px;
       }
-
+    
       #debugConsole {
         width: 200px;
         height: 150px;
@@ -279,6 +323,8 @@
 </head>
 <body>
   <h1>Lyrical Master</h1>
+  <p class="note">This site is still under development and accuracy varies.</p>
+  
   <div class="button-container">
     <button id="listenButton">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -298,56 +344,62 @@
       </div>
     </div>
   </div>
-
-  <!-- Div to display recognized song information -->
-  <div id="songInfo"></div>
-
-  <!-- Debug console (optional) -->
+  
+  <!-- Modal for displaying recognized song information -->
+  <div id="resultModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <div id="modalSongInfo"></div>
+    </div>
+  </div>
+  
+  <!-- Optional debug console -->
   <div id="debugConsole"></div>
-
+  
   <script>
     // AudD API details
     const API_KEY = "95ed2b366d6b459f91aa98afb222499d";
     const API_URL = "https://api.audd.io/";
-
+    
     const listenButton = document.getElementById('listenButton');
     const buttonCaption = document.getElementById('buttonCaption');
     const listeningText = document.getElementById('listeningText');
     const loader = document.querySelector('.loader');
     const debugConsole = document.getElementById('debugConsole');
-    const songInfo = document.getElementById('songInfo');
-
+    const resultModal = document.getElementById('resultModal');
+    const modalSongInfo = document.getElementById('modalSongInfo');
+    const modalClose = document.querySelector('.modal-close');
+    
     let isRecording = false;
     let mediaRecorder;
     let audioChunks = [];
-
+    
     function log(message) {
       const logEntry = document.createElement('div');
       logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
       debugConsole.appendChild(logEntry);
       debugConsole.scrollTop = debugConsole.scrollHeight;
     }
-
+    
     function startRecording() {
       isRecording = true;
       buttonCaption.style.display = 'none';
       listeningText.style.display = 'block';
       loader.style.display = 'block';
-      songInfo.innerHTML = ''; // clear previous result
       log("Requesting microphone access...");
-
+    
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
           log("Microphone access granted. Starting recording...");
           mediaRecorder = new MediaRecorder(stream);
           audioChunks = [];
-
+    
           mediaRecorder.ondataavailable = event => {
             if (event.data.size > 0) {
               audioChunks.push(event.data);
             }
           };
-
+    
           mediaRecorder.onstop = () => {
             log("Recording stopped. Processing audio...");
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
@@ -355,7 +407,7 @@
             // Stop all tracks to release the microphone
             stream.getTracks().forEach(track => track.stop());
           };
-
+    
           mediaRecorder.start();
           // Record for 5 seconds then stop
           setTimeout(() => {
@@ -373,13 +425,13 @@
           loader.style.display = 'none';
         });
     }
-
+    
     function sendAudio(audioBlob) {
       log("Sending audio to AudD API...");
       const formData = new FormData();
       formData.append("api_token", API_KEY);
       formData.append("file", audioBlob, "recording.wav");
-
+    
       fetch(API_URL, {
         method: "POST",
         body: formData
@@ -390,25 +442,42 @@
           if (data && data.result) {
             const title = data.result.title || "Unknown Title";
             const artist = data.result.artist || "Unknown Artist";
-            songInfo.innerHTML = `<h2>${title}</h2><h3>${artist}</h3>`;
+            showModal(title, artist);
           } else {
-            songInfo.innerHTML = `<p>Song not recognized. Please try again.</p>`;
+            showModal("Song not recognized", "Please try again.");
           }
           loader.style.display = 'none';
         })
         .catch(error => {
           log("Error from AudD API: " + error);
-          songInfo.innerHTML = `<p>Error recognizing song.</p>`;
+          showModal("Error", "There was an error recognizing the song.");
           loader.style.display = 'none';
         });
     }
-
+    
+    function showModal(title, artist) {
+      modalSongInfo.innerHTML = `<h2>${title}</h2><h3>${artist}</h3>`;
+      resultModal.style.display = "block";
+    }
+    
+    // Close the modal when the close button is clicked
+    modalClose.addEventListener('click', () => {
+      resultModal.style.display = "none";
+    });
+    
+    // Optionally, close the modal if user clicks outside the modal-content
+    window.addEventListener('click', event => {
+      if (event.target === resultModal) {
+        resultModal.style.display = "none";
+      }
+    });
+    
     listenButton.addEventListener('click', () => {
       if (!isRecording) {
         startRecording();
       }
     });
-
+    
     log("Lyrical Master initialized");
   </script>
 </body>
