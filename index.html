@@ -280,14 +280,20 @@
     
     /* Lyrics container inside the modal */
     .lyrics-container {
-      max-height: 300px;
-      overflow-y: auto;
       margin-top: 1rem;
-      text-align: left;
-      background-color: #f7f7f7;
-      padding: 10px;
-      border-radius: 5px;
-      white-space: pre-wrap;
+      min-height: 2em;
+    }
+    
+    /* Style for an individual lyric line with a fade-in effect */
+    .lyrics-line {
+      font-size: 1.2rem;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     /* Debug Console (optional) */
@@ -357,7 +363,7 @@
     </div>
   </div>
   
-  <!-- Modal for displaying recognized song information and lyrics -->
+  <!-- Modal for displaying recognized song information and animated lyrics -->
   <div id="resultModal" class="modal">
     <div class="modal-content">
       <span class="modal-close">&times;</span>
@@ -490,14 +496,38 @@
         });
     }
     
-    // Show the modal with song info and lyrics
+    // Show the modal with song info and animated lyrics
     function showModal(title, artist, lyrics) {
       let html = `<h2>${title}</h2><h3>${artist}</h3>`;
       if (lyrics) {
-        html += `<div class="lyrics-container">${lyrics}</div>`;
+        html += `<div class="lyrics-container"></div>`;
       }
       modalSongInfo.innerHTML = html;
       resultModal.style.display = "block";
+      if (lyrics) {
+        animateLyrics(lyrics);
+      }
+    }
+    
+    // Animate the lyrics by displaying one line at a time
+    function animateLyrics(lyrics) {
+      const lines = lyrics.split(/\r?\n/).filter(line => line.trim() !== "");
+      const container = document.querySelector(".lyrics-container");
+      container.innerHTML = "";
+      let index = 0;
+      
+      function displayLine() {
+        if (index < lines.length) {
+          container.innerHTML = `<p class="lyrics-line">${lines[index]}</p>`;
+          index++;
+          // Change the duration (in milliseconds) below to adjust how long each line is shown
+          setTimeout(displayLine, 3000);
+        } else {
+          container.innerHTML = "";
+        }
+      }
+      
+      displayLine();
     }
     
     // Close the modal when the close button is clicked
