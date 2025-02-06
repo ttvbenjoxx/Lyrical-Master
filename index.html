@@ -278,6 +278,18 @@
       color: #333;
     }
     
+    /* Lyrics container inside the modal */
+    .lyrics-container {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      text-align: left;
+      background-color: #f7f7f7;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+    
     /* Debug Console (optional) */
     #debugConsole {
       position: fixed;
@@ -345,7 +357,7 @@
     </div>
   </div>
   
-  <!-- Modal for displaying recognized song information -->
+  <!-- Modal for displaying recognized song information and lyrics -->
   <div id="resultModal" class="modal">
     <div class="modal-content">
       <span class="modal-close">&times;</span>
@@ -381,6 +393,7 @@
       debugConsole.scrollTop = debugConsole.scrollHeight;
     }
     
+    // Start recording 5 seconds of audio from the microphone
     function startRecording() {
       isRecording = true;
       buttonCaption.style.display = 'none';
@@ -404,12 +417,12 @@
             log("Recording stopped. Processing audio...");
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             sendAudio(audioBlob);
-            // Stop all tracks to release the microphone
+            // Release the microphone
             stream.getTracks().forEach(track => track.stop());
           };
     
           mediaRecorder.start();
-          // Record for 5 seconds then stop
+          // Stop recording after 5 seconds
           setTimeout(() => {
             if (mediaRecorder.state !== "inactive") {
               mediaRecorder.stop();
@@ -426,6 +439,7 @@
         });
     }
     
+    // Send recorded audio to AudD API for song recognition
     function sendAudio(audioBlob) {
       log("Sending audio to AudD API...");
       const formData = new FormData();
@@ -442,21 +456,47 @@
           if (data && data.result) {
             const title = data.result.title || "Unknown Title";
             const artist = data.result.artist || "Unknown Artist";
-            showModal(title, artist);
+            // Fetch lyrics from lyrics.ovh using the recognized title and artist
+            fetchLyrics(artist, title)
+              .then(lyrics => {
+                showModal(title, artist, lyrics);
+              });
           } else {
-            showModal("Song not recognized", "Please try again.");
+            showModal("Song not recognized", "Please try again.", "");
           }
           loader.style.display = 'none';
         })
         .catch(error => {
           log("Error from AudD API: " + error);
-          showModal("Error", "There was an error recognizing the song.");
+          showModal("Error", "There was an error recognizing the song.", "");
           loader.style.display = 'none';
         });
     }
     
-    function showModal(title, artist) {
-      modalSongInfo.innerHTML = `<h2>${title}</h2><h3>${artist}</h3>`;
+    // Fetch lyrics from the lyrics.ovh API
+    function fetchLyrics(artist, title) {
+      const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+      return fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Lyrics not found");
+          }
+          return response.json();
+        })
+        .then(data => data.lyrics)
+        .catch(error => {
+          log("Error fetching lyrics: " + error);
+          return "Lyrics not found.";
+        });
+    }
+    
+    // Show the modal with song info and lyrics
+    function showModal(title, artist, lyrics) {
+      let html = `<h2>${title}</h2><h3>${artist}</h3>`;
+      if (lyrics) {
+        html += `<div class="lyrics-container">${lyrics}</div>`;
+      }
+      modalSongInfo.innerHTML = html;
       resultModal.style.display = "block";
     }
     
@@ -465,7 +505,7 @@
       resultModal.style.display = "none";
     });
     
-    // Optionally, close the modal if user clicks outside the modal-content
+    // Close the modal if the user clicks outside the modal-content
     window.addEventListener('click', event => {
       if (event.target === resultModal) {
         resultModal.style.display = "none";
