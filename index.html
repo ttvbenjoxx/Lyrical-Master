@@ -34,13 +34,13 @@
       margin-top: 20px;
     }
     
-    /* Left Panel: For the microphone/screen-sharing controls and debug info */
+    /* Left Panel: For controls and debug info */
     #leftPanel {
       flex: 1;
       max-width: 300px;
     }
     
-    /* Right Panel: For showing recognized song info and video */
+    /* Right Panel: For song info and video */
     #rightPanel {
       flex: 2;
       margin-left: 20px;
@@ -65,7 +65,7 @@
       align-items: center;
       justify-content: center;
       transition: background-color 0.3s, transform 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     #listenButton:hover {
@@ -178,6 +178,47 @@
       min-height: 400px;
     }
     
+    /* Capture Choice Modal Styles */
+    #captureChoiceModal {
+      display: none; /* hidden by default */
+      position: fixed;
+      z-index: 200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+    }
+    
+    #captureChoiceModal .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      margin: 15% auto;
+      text-align: center;
+    }
+    
+    #captureChoiceModal button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    
+    #captureChoiceModal .btn-system {
+      background-color: #3f51b5;
+      color: #fff;
+    }
+    
+    #captureChoiceModal .btn-mic {
+      background-color: #777;
+      color: #fff;
+    }
+    
     /* Debug Console (for troubleshooting) */
     #debugConsole {
       margin-top: 20px;
@@ -245,6 +286,16 @@
     </div>
   </div>
   
+  <!-- Capture Choice Modal -->
+  <div id="captureChoiceModal">
+    <div class="modal-content">
+      <h3>Choose Audio Capture Mode</h3>
+      <p>Do you want to capture system audio (screen sharing) or use the microphone?</p>
+      <button class="btn-system" id="btnSystem">System Audio</button>
+      <button class="btn-mic" id="btnMic">Microphone</button>
+    </div>
+  </div>
+  
   <script>
     // API details
     const AUDD_API_KEY = "95ed2b366d6b459f91aa98afb222499d";
@@ -259,11 +310,17 @@
     const debugConsole = document.getElementById('debugConsole');
     const resultPanel = document.getElementById('resultPanel');
     const songStatus = document.getElementById('songStatus');
+    const captureChoiceModal = document.getElementById('captureChoiceModal');
+    const btnSystem = document.getElementById('btnSystem');
+    const btnMic = document.getElementById('btnMic');
     
     let isRecording = false;
     let mediaRecorder;
     let audioChunks = [];
     let recordingTimeoutId;
+    
+    // Global variable to hold user's choice: true for system audio, false for mic
+    let useSystemAudio = false;
     
     function log(message) {
       const logEntry = document.createElement('div');
@@ -272,29 +329,43 @@
       debugConsole.scrollTop = debugConsole.scrollHeight;
     }
     
+    // Show the capture choice modal and return a promise that resolves with the choice
+    function showCaptureChoiceModal() {
+      return new Promise((resolve, reject) => {
+        captureChoiceModal.style.display = "block";
+        btnSystem.onclick = () => {
+          captureChoiceModal.style.display = "none";
+          resolve(true);  // Use system audio
+        };
+        btnMic.onclick = () => {
+          captureChoiceModal.style.display = "none";
+          resolve(false); // Use microphone
+        };
+      });
+    }
+    
     // Start recording audio for 5 seconds
-    function startRecording() {
+    async function startRecording() {
+      // Show the capture choice modal and await the user's decision
+      useSystemAudio = await showCaptureChoiceModal();
+      
       isRecording = true;
       buttonCaption.style.display = 'none';
       listeningText.style.display = 'block';
       loader.style.display = 'block';
-      log("Requesting microphone access...");
-      
-      // Ask user if they want to capture system audio (via screen share) or microphone audio
-      // Note: getDisplayMedia() will show a screen-sharing prompt.
-      let useDisplayMedia = confirm("Do you want to capture system audio? (Click OK for screen-sharing mode, Cancel for microphone)");
+      log("Requesting audio capture...");
       
       let getAudioStream;
-      if (useDisplayMedia && navigator.mediaDevices.getDisplayMedia) {
-        // Request display media with audio (system audio may be available on some browsers)
+      if (useSystemAudio && navigator.mediaDevices.getDisplayMedia) {
+        // Request display media with audio (system audio)
         getAudioStream = navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
           .then(stream => {
-            // Optionally, stop the video tracks if you only need audio
+            // Stop video tracks if not needed
             stream.getVideoTracks().forEach(track => track.stop());
             return stream;
           });
       } else {
-        // Fall back to microphone capture
+        // Fallback to microphone
         getAudioStream = navigator.mediaDevices.getUserMedia({ audio: true });
       }
       
