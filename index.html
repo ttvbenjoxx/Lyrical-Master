@@ -266,7 +266,7 @@
     </div>
   </div>
   
-  <!-- Modal for displaying the recognized song info and embedded YouTube video -->
+  <!-- Modal for displaying recognized song info and embedded YouTube video -->
   <div id="resultModal" class="modal">
     <div class="modal-content">
       <span class="modal-close">&times;</span>
@@ -363,7 +363,7 @@
       }
     }
     
-    // Toggle recording on space key press
+    // Toggle recording on space bar press
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' || e.keyCode === 32) {
         e.preventDefault();
@@ -397,9 +397,10 @@
           if (isRecording) {
             stopRecording();
           }
-          // Now search YouTube for a lyric video using the recognized song info and offset
+          // Show modal with recognized song info and embed YouTube video
           showModal(title, artist, offset);
         } else {
+          // Do not embed video if song not recognized
           showModal("Song not recognized", "Please try again.", 0);
         }
         loader.style.display = 'none';
@@ -428,35 +429,42 @@
         });
     }
     
-    // Display the modal with song info and embed the YouTube video, synced at offset
+    // Display the modal with song info and embed the YouTube video (if recognized)
     function showModal(title, artist, offset) {
-      let html = `<h2>${title}</h2><h3>${artist}</h3>`;
-      html += `<div id="youtubeContainer"></div>`;
+      let html = `<h2>${title}</h2>`;
+      if (title !== "Song not recognized" && title !== "Error") {
+        html += `<h3>${artist}</h3>`;
+        html += `<div id="youtubeContainer"></div>`;
+      } else {
+        html += `<p>${artist}</p>`;
+      }
       modalSongInfo.innerHTML = html;
       resultModal.style.display = "block";
       
-      // Search YouTube and embed the video
-      searchYouTubeForVideo({ title, artist })
-        .then(videoId => {
-          var ytContainer = document.getElementById("youtubeContainer");
-          ytContainer.innerHTML = `<div id="ytplayer"></div>`;
-          new YT.Player("ytplayer", {
-            height: '360',
-            width: '640',
-            videoId: videoId,
-            playerVars: {
-              start: offset,  // Start the video at the detected offset
-              autoplay: 1
-            },
-            events: {
-              'onReady': event => { event.target.playVideo(); },
-              'onStateChange': event => { /* Optionally handle state changes */ }
-            }
+      // Only embed YouTube video if the song is recognized
+      if (title !== "Song not recognized" && title !== "Error") {
+        searchYouTubeForVideo({ title, artist })
+          .then(videoId => {
+            var ytContainer = document.getElementById("youtubeContainer");
+            ytContainer.innerHTML = `<div id="ytplayer"></div>`;
+            new YT.Player("ytplayer", {
+              height: '360',
+              width: '640',
+              videoId: videoId,
+              playerVars: {
+                start: offset,  // Start the video at the detected offset
+                autoplay: 1
+              },
+              events: {
+                'onReady': event => { event.target.playVideo(); },
+                'onStateChange': event => { /* Optionally handle state changes */ }
+              }
+            });
+          })
+          .catch(error => {
+            log("Error embedding YouTube video: " + error);
           });
-        })
-        .catch(error => {
-          log("Error embedding YouTube video: " + error);
-        });
+      }
     }
     
     // Close the modal when the close button is clicked
