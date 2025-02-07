@@ -34,7 +34,7 @@
       margin-top: 20px;
     }
     
-    /* Left Panel: For the microphone button and debug info */
+    /* Left Panel: For the microphone/screen-sharing controls and debug info */
     #leftPanel {
       flex: 1;
       max-width: 300px;
@@ -79,7 +79,8 @@
       fill: #fff;
     }
     
-    #buttonCaption, #listeningText {
+    #buttonCaption,
+    #listeningText {
       margin-top: 1rem;
       color: #555;
     }
@@ -279,42 +280,58 @@
       loader.style.display = 'block';
       log("Requesting microphone access...");
       
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          log("Microphone access granted. Starting recording...");
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-          
-          mediaRecorder.ondataavailable = event => {
-            if (event.data.size > 0) {
-              audioChunks.push(event.data);
-            }
-          };
-          
-          mediaRecorder.onstop = () => {
-            log("Recording stopped. Processing audio...");
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            sendAudio(audioBlob);
-            // Release the microphone
-            stream.getTracks().forEach(track => track.stop());
-          };
-          
-          mediaRecorder.start();
-          // Stop recording after 5 seconds if not manually stopped
-          recordingTimeoutId = setTimeout(() => {
-            if (mediaRecorder.state !== "inactive") {
-              mediaRecorder.stop();
-            }
-            isRecording = false;
-            buttonCaption.style.display = 'block';
-            listeningText.style.display = 'none';
-          }, 5000);
-        })
-        .catch(err => {
-          log("Error accessing microphone: " + err);
+      // Ask user if they want to capture system audio (via screen share) or microphone audio
+      // Note: getDisplayMedia() will show a screen-sharing prompt.
+      let useDisplayMedia = confirm("Do you want to capture system audio? (Click OK for screen-sharing mode, Cancel for microphone)");
+      
+      let getAudioStream;
+      if (useDisplayMedia && navigator.mediaDevices.getDisplayMedia) {
+        // Request display media with audio (system audio may be available on some browsers)
+        getAudioStream = navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+          .then(stream => {
+            // Optionally, stop the video tracks if you only need audio
+            stream.getVideoTracks().forEach(track => track.stop());
+            return stream;
+          });
+      } else {
+        // Fall back to microphone capture
+        getAudioStream = navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+      
+      getAudioStream.then(stream => {
+        log("Audio stream acquired. Starting recording...");
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = event => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = () => {
+          log("Recording stopped. Processing audio...");
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          sendAudio(audioBlob);
+          // Release all tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        // Stop recording after 5 seconds if not manually stopped
+        recordingTimeoutId = setTimeout(() => {
+          if (mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+          }
+          isRecording = false;
+          buttonCaption.style.display = 'block';
           listeningText.style.display = 'none';
-          loader.style.display = 'none';
-        });
+        }, 5000);
+      }).catch(err => {
+        log("Error acquiring audio stream: " + err);
+        listeningText.style.display = 'none';
+        loader.style.display = 'none';
+      });
     }
     
     // Stop recording (if running)
@@ -442,9 +459,9 @@
     log("Lyrical Master initialized");
     
     // Load the YouTube IFrame Player API asynchronously
-    var tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
+    var ytTag = document.createElement('script');
+    ytTag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(ytTag);
   </script>
 </body>
 </html>
